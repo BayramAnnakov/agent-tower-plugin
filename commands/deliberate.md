@@ -1,6 +1,6 @@
 ---
 description: Producer/reviewer deliberation until consensus
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 ---
 
 ## Overview
@@ -17,6 +17,37 @@ The deliberation mode runs a producer and reviewer agent in sequential rounds un
 - Document review with feedback cycles
 - Architecture proposals with critique
 - Any task benefiting from structured feedback
+
+## Pre-Execution: Gather Configuration
+
+Before running the deliberation, use **AskUserQuestion** to confirm configuration options with the user. Ask about:
+
+1. **Maximum rounds** - How many rounds before stopping if no consensus?
+2. **Consensus threshold** - How strict should the agreement requirement be?
+3. **Agent roles** - Which agents should be producer vs reviewer?
+
+Example AskUserQuestion usage:
+```
+Use AskUserQuestion with:
+- question: "How many deliberation rounds maximum?"
+- header: "Max Rounds"
+- options:
+  - label: "3 rounds", description: "Quick iteration, may not reach full consensus"
+  - label: "5 rounds (Recommended)", description: "Balanced depth for most tasks"
+  - label: "7 rounds", description: "Thorough refinement for complex tasks"
+```
+
+```
+Use AskUserQuestion with:
+- question: "How strict should the consensus threshold be?"
+- header: "Threshold"
+- options:
+  - label: "80%", description: "More lenient - faster consensus"
+  - label: "85% (Recommended)", description: "Balanced - good agreement level"
+  - label: "90%", description: "Strict - higher quality but may not reach consensus"
+```
+
+If the user provided explicit flags in $ARGUMENTS (e.g., `--max-rounds 3`), skip asking about those options.
 
 ## Arguments
 

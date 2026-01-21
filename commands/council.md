@@ -1,6 +1,6 @@
 ---
 description: Multi-agent council with parallel opinions and synthesis
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 ---
 
 ## Overview
@@ -16,6 +16,26 @@ The council mode runs multiple AI agents in parallel to gather diverse perspecti
 - Dynamic persona assignment based on task keywords (Security Analyst, Systems Architect, etc.)
 - Anonymized peer ranking to avoid bias
 - Weighted synthesis based on peer rankings
+
+## Pre-Execution: Gather Configuration
+
+Before running the council, use **AskUserQuestion** to confirm configuration options with the user. Ask about:
+
+1. **Number of agents** - How many agents should participate? (2-4 typically)
+2. **Use personas** - Should agents be assigned expert personas based on the task?
+
+Example AskUserQuestion usage:
+```
+Use AskUserQuestion with:
+- question: "How many agents should participate in the council?"
+- header: "Agents"
+- options:
+  - label: "2 agents (Recommended)", description: "Faster, good for simple evaluations"
+  - label: "3 agents", description: "Balanced coverage with diverse perspectives"
+  - label: "All available", description: "Maximum perspectives, slower execution"
+```
+
+If the user provided explicit flags in $ARGUMENTS (e.g., `--agents 3`), skip asking about those options.
 
 ## Arguments
 

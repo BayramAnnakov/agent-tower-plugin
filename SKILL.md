@@ -6,11 +6,22 @@ allowed-tools:
   - Read
   - Glob
   - Grep
+  - AskUserQuestion
 ---
 
 # Agent Tower Plugin
 
 Multi-agent deliberation for Claude Code. Orchestrate multiple AI coding assistants (Claude, Codex, Gemini) to get diverse perspectives on tasks.
+
+## Interactive Configuration
+
+Before running any multi-agent workflow, use **AskUserQuestion** to gather configuration preferences from the user. This ensures the user has control over:
+- Number of agents/rounds
+- Consensus thresholds
+- Agent role assignments
+- Other mode-specific options
+
+Skip questions for any options the user explicitly provided in their command.
 
 ## Available Skills
 

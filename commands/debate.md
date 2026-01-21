@@ -1,6 +1,6 @@
 ---
 description: Adversarial debate with pro/con agents and judge
-allowed-tools: Bash, Read, Glob, Grep
+allowed-tools: Bash, Read, Glob, Grep, AskUserQuestion
 ---
 
 ## Overview
@@ -17,6 +17,26 @@ The debate mode runs two agents arguing opposing positions (pro and con), then a
 - Technology trade-off evaluations
 - Architecture decision records
 - Pros/cons analysis
+
+## Pre-Execution: Gather Configuration
+
+Before running the debate, use **AskUserQuestion** to confirm configuration options with the user. Ask about:
+
+1. **Number of rounds** - How many argument/rebuttal rounds?
+2. **Agent assignments** - Which agents should argue each side?
+
+Example AskUserQuestion usage:
+```
+Use AskUserQuestion with:
+- question: "How many debate rounds should there be?"
+- header: "Rounds"
+- options:
+  - label: "2 rounds", description: "Quick debate - opening + one rebuttal"
+  - label: "3 rounds (Recommended)", description: "Balanced depth for most decisions"
+  - label: "5 rounds", description: "Thorough exploration of all angles"
+```
+
+If the user provided explicit flags in $ARGUMENTS (e.g., `--rounds 2`), skip asking about those options.
 
 ## Arguments
 
