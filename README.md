@@ -13,7 +13,7 @@ claude plugin marketplace add BayramAnnakov/agent-tower-plugin
 # Install the plugin
 claude plugin install agent-tower-plugin@agent-tower-plugin-marketplace
 
-# IMPORTANT: Restart Claude Code to activate the plugin
+# Restart Claude Code to activate the plugin
 ```
 
 ### From Local Directory

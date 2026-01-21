@@ -1,0 +1,13 @@
+{
+  "name": "agent-tower-plugin-marketplace",
+  "owner": {
+    "name": "Bayram Annakov"
+  },
+  "plugins": [
+    {
+      "name": "agent-tower-plugin",
+      "source": "./",
+      "description": "Multi-agent deliberation for Claude Code - council, debate, and consensus workflows"
+    }
+  ]
+}
