@@ -34,6 +34,7 @@ async def main():
     parser.add_argument("--task", required=True, help="Task/question for the council")
     parser.add_argument("--agents", type=int, default=0, help="Number of agents (0=all available)")
     parser.add_argument("--no-personas", action="store_true", help="Disable dynamic persona assignment")
+    parser.add_argument("--personas", help="Custom personas as JSON array: '[{\"name\":\"Expert\",\"focus\":\"topic\"}]'")
     parser.add_argument("--verbose", "-v", action="store_true", help="Print progress to stderr")
 
     args = parser.parse_args()
@@ -42,6 +43,18 @@ async def main():
     if error := validate_input(args.task):
         print(json.dumps({"error": error}), file=sys.stdout)
         sys.exit(1)
+
+    # Parse custom personas if provided
+    custom_personas = None
+    if args.personas:
+        try:
+            custom_personas = json.loads(args.personas)
+            if not isinstance(custom_personas, list):
+                print(json.dumps({"error": "Personas must be a JSON array"}), file=sys.stdout)
+                sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(json.dumps({"error": f"Invalid personas JSON: {e}"}), file=sys.stdout)
+            sys.exit(1)
 
     # Get available agents
     available = await get_available_agents()
@@ -61,6 +74,8 @@ async def main():
     if args.verbose:
         print(f"Available agents: {available}", file=sys.stderr)
         print(f"Using {num_agents} agents", file=sys.stderr)
+        if custom_personas:
+            print(f"Using custom personas: {custom_personas}", file=sys.stderr)
 
     members = [get_agent(name) for name in available[:num_agents]]
 
@@ -69,6 +84,7 @@ async def main():
         members=members,
         chairman=members[0],
         use_personas=not args.no_personas,
+        custom_personas=custom_personas,
         verbose=args.verbose,
     )
 

@@ -84,11 +84,18 @@ class TestInferPersonas:
         persona_names = [p.name for p in personas]
         assert "Business Strategist" in persona_names
 
-    def test_devils_advocate_included(self):
-        """Test that Devil's Advocate is included with 3+ agents."""
-        personas = infer_personas("Some generic task", 3)
+    def test_devils_advocate_included_for_technical(self):
+        """Test that Devil's Advocate is included with 3+ agents for technical tasks."""
+        # Use a technical keyword to trigger technical persona assignment
+        personas = infer_personas("Review the security of this code", 3)
         persona_names = [p.name for p in personas]
         assert "Devil's Advocate" in persona_names
+
+    def test_critical_thinker_for_general_tasks(self):
+        """Test that Critical Thinker is included for general (non-technical) tasks."""
+        personas = infer_personas("What is the best hiking trail?", 3)
+        persona_names = [p.name for p in personas]
+        assert "Critical Thinker" in persona_names
 
     def test_devils_advocate_not_with_two_agents(self):
         """Test that Devil's Advocate may be skipped with 2 agents."""

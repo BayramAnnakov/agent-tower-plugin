@@ -112,6 +112,7 @@ class CouncilMode:
         members: list[AgentBackend],
         chairman: Optional[AgentBackend] = None,
         use_personas: bool = True,
+        custom_personas: Optional[list[dict]] = None,
         verbose: bool = False,
         max_concurrent: int = 5,
     ):
@@ -121,6 +122,7 @@ class CouncilMode:
             members: List of agent backends to serve as council members
             chairman: Agent to synthesize final answer (defaults to first member)
             use_personas: Whether to dynamically assign personas based on task
+            custom_personas: Custom personas as list of dicts with 'name' and 'focus' keys
             verbose: Whether to print progress to stderr
             max_concurrent: Maximum concurrent agent invocations (default: 5)
         """
@@ -130,6 +132,7 @@ class CouncilMode:
         self.members = members
         self.chairman = chairman or members[0]
         self.use_personas = use_personas
+        self.custom_personas = custom_personas
         self.verbose = verbose
         self.max_concurrent = max_concurrent
         self._semaphore = asyncio.Semaphore(max_concurrent)
@@ -155,9 +158,28 @@ class CouncilMode:
         member_names = [m.name for m in self.members]
         logger.info(f"Starting council deliberation with members: {member_names}")
 
-        # Infer personas based on task
+        # Assign personas based on task or custom personas
         personas_assigned = []
-        if self.use_personas:
+        if self.custom_personas:
+            # Use custom personas provided by the caller
+            for i, (member, custom) in enumerate(zip(self.members, self.custom_personas)):
+                name = custom.get("name", f"Expert {i+1}")
+                focus = custom.get("focus", "general analysis")
+                focus_areas = [focus] if isinstance(focus, str) else focus
+                persona = Persona(
+                    name=name,
+                    focus_areas=focus_areas if isinstance(focus_areas, list) else [focus_areas],
+                    system_prompt=f"You are acting as a {name}. Focus on: {focus}"
+                )
+                self.personas[member.name] = persona
+                personas_assigned.append({
+                    "agent": member.name,
+                    "persona": persona.name,
+                    "focus_areas": persona.focus_areas[:3],
+                })
+            self._log(f"Using custom personas: {personas_assigned}")
+        elif self.use_personas:
+            # Infer personas based on task keywords
             personas = infer_personas(task, len(self.members))
             for member, persona in zip(self.members, personas):
                 self.personas[member.name] = persona

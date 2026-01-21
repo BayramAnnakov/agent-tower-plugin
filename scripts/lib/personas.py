@@ -144,6 +144,51 @@ FINANCIAL_ANALYST = Persona(
 - Identify funding requirements"""
 )
 
+# General knowledge personas (for non-technical questions)
+RESEARCH_ANALYST = Persona(
+    name="Research Analyst",
+    focus_areas=["facts", "sources", "evidence", "comprehensive analysis", "accuracy"],
+    system_prompt="""Provide well-researched, factual analysis:
+- Gather relevant facts and data
+- Cite reliable sources when possible
+- Provide comprehensive coverage of the topic
+- Distinguish between facts and opinions
+- Acknowledge limitations in knowledge"""
+)
+
+LOCAL_EXPERT = Persona(
+    name="Local Expert",
+    focus_areas=["local knowledge", "practical tips", "insider recommendations", "logistics", "timing"],
+    system_prompt="""Provide practical, local expertise:
+- Share specific recommendations with details
+- Consider practical logistics (timing, access, costs)
+- Highlight insider tips and lesser-known options
+- Account for seasonal variations
+- Provide actionable guidance"""
+)
+
+CRITICAL_THINKER = Persona(
+    name="Critical Thinker",
+    focus_areas=["assumptions", "alternatives", "trade-offs", "nuance", "context"],
+    system_prompt="""Apply critical thinking to the question:
+- Challenge assumptions in the question
+- Consider multiple perspectives
+- Identify trade-offs and nuances
+- Provide context that affects the answer
+- Note when "best" depends on individual factors"""
+)
+
+PRACTICAL_ADVISOR = Persona(
+    name="Practical Advisor",
+    focus_areas=["actionable advice", "step-by-step guidance", "common pitfalls", "preparation", "resources"],
+    system_prompt="""Provide practical, actionable advice:
+- Give clear, actionable recommendations
+- Include step-by-step guidance if helpful
+- Warn about common mistakes or pitfalls
+- Suggest preparation steps
+- Point to useful resources"""
+)
+
 # Keywords to persona mapping
 TASK_KEYWORDS = {
     # Security-related
@@ -228,13 +273,25 @@ def infer_personas(task: str, num_agents: int) -> list[Persona]:
             if len(selected) >= num_agents:
                 break
 
-    # If we don't have enough, add complementary defaults
-    defaults = [
-        CODE_QUALITY_REVIEWER,
-        DEVIL_ADVOCATE,
-        SYSTEMS_ARCHITECT,
-        BUSINESS_STRATEGIST,
-    ]
+    # Determine if this is a technical/software question or general knowledge
+    is_technical = len(selected) > 0
+
+    if is_technical:
+        # Technical defaults
+        defaults = [
+            CODE_QUALITY_REVIEWER,
+            DEVIL_ADVOCATE,
+            SYSTEMS_ARCHITECT,
+            BUSINESS_STRATEGIST,
+        ]
+    else:
+        # General knowledge defaults - use generalist personas
+        defaults = [
+            RESEARCH_ANALYST,
+            LOCAL_EXPERT,
+            CRITICAL_THINKER,
+            PRACTICAL_ADVISOR,
+        ]
 
     for persona in defaults:
         if len(selected) >= num_agents:
@@ -243,8 +300,9 @@ def infer_personas(task: str, num_agents: int) -> list[Persona]:
             selected.append(persona)
             seen_names.add(persona.name)
 
-    # Always include Devil's Advocate if we have 3+ agents
-    if num_agents >= 3 and DEVIL_ADVOCATE.name not in seen_names:
+    # For technical questions, include Devil's Advocate if 3+ agents
+    # For general questions, include Critical Thinker (already in defaults)
+    if is_technical and num_agents >= 3 and DEVIL_ADVOCATE.name not in seen_names:
         # Replace the last one with Devil's Advocate
         if len(selected) >= num_agents:
             selected[-1] = DEVIL_ADVOCATE
