@@ -41,16 +41,18 @@ At least 2 of these CLI tools must be installed and accessible:
 
 ### `/tower:council` - Multi-Agent Council
 
-Runs multiple agents in parallel, each providing an independent opinion with an automatically assigned expert persona. Agents anonymously rank each other's responses, and a chairman synthesizes the final answer.
+Runs multiple agents in parallel, each providing an independent opinion. Before running, Claude analyzes your question and suggests relevant perspectives (personas) via an interactive prompt. Agents anonymously rank each other's responses, and a chairman synthesizes the final answer.
 
 ```bash
 /tower:council "Should we use TypeScript or JavaScript?"
+/tower:council "What's the best fitness program to improve VO2max?"
 /tower:council "Evaluate the security of this codebase" --agents 3
 ```
 
 **Options:**
 - `--agents N`: Use N agents (default: all available)
-- `--no-personas`: Disable automatic persona assignment
+- `--personas JSON`: Custom personas as JSON array
+- `--no-personas`: Disable persona assignment
 - `-v, --verbose`: Show detailed progress
 
 ### `/tower:debate` - Adversarial Debate
@@ -127,11 +129,13 @@ agent-tower-plugin/
 
 ### Council Mode
 
-1. **Stage 1 - Opinions**: All agents analyze the task in parallel. Each gets a dynamically assigned persona based on task keywords (e.g., "Security Analyst" for security-related tasks).
+1. **Pre-flight - Persona Selection**: Claude analyzes your question and suggests relevant perspectives via an interactive prompt. You select which personas to use (e.g., "Exercise Physiologist", "Local Expert", "Critical Thinker").
 
-2. **Stage 2 - Ranking**: Each agent reviews and ranks others' responses. Responses are anonymized (A, B, C) to avoid bias.
+2. **Stage 1 - Opinions**: All agents analyze the task in parallel with their assigned personas.
 
-3. **Stage 3 - Synthesis**: A chairman agent synthesizes all opinions, weighted by peer rankings, into a final answer.
+3. **Stage 2 - Ranking**: Each agent reviews and ranks others' responses. Responses are anonymized (A, B, C) to avoid bias.
+
+4. **Stage 3 - Synthesis**: A chairman agent synthesizes all opinions, weighted by peer rankings, into a final answer.
 
 ### Debate Mode
 
@@ -147,19 +151,36 @@ agent-tower-plugin/
 
 ## Dynamic Personas
 
-Council mode automatically assigns expert personas based on task keywords:
+Claude analyzes your question and suggests relevant personas. You can also use custom personas via the `--personas` flag.
 
-| Persona | Keywords |
-|---------|----------|
-| Security Analyst | auth, vulnerability, owasp, injection, xss |
-| Systems Architect | scalability, performance, infrastructure, caching |
-| Code Quality Reviewer | refactor, maintainability, testing, patterns |
-| Business Strategist | market, monetization, growth, startup |
-| Product Manager | product, feature, user, roadmap, requirements |
-| Data Engineer | database, schema, sql, pipeline, etl |
-| DevOps Engineer | deploy, kubernetes, docker, monitoring |
-| UX Designer | ui, interface, usability, accessibility |
-| Devil's Advocate | (auto-included when 3+ agents) |
+### Technical Personas (for code/architecture questions)
+
+| Persona | Focus Areas |
+|---------|-------------|
+| Security Analyst | auth, vulnerabilities, OWASP, injection |
+| Systems Architect | scalability, performance, infrastructure |
+| Code Quality Reviewer | refactoring, testing, patterns |
+| DevOps Engineer | deployment, kubernetes, monitoring |
+| Data Engineer | databases, schemas, pipelines |
+| Devil's Advocate | risks, assumptions, edge cases |
+
+### Generalist Personas (for non-technical questions)
+
+| Persona | Focus Areas |
+|---------|-------------|
+| Research Analyst | facts, sources, evidence, accuracy |
+| Local Expert | practical tips, insider knowledge, logistics |
+| Critical Thinker | assumptions, trade-offs, nuance |
+| Practical Advisor | actionable advice, common pitfalls |
+
+### Business Personas
+
+| Persona | Focus Areas |
+|---------|-------------|
+| Business Strategist | market, monetization, growth |
+| Product Manager | user needs, features, roadmap |
+| Financial Analyst | pricing, margins, projections |
+| UX Designer | usability, accessibility, flows |
 
 ## License
 

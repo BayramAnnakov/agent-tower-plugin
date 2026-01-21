@@ -28,9 +28,9 @@ Skip questions for any options the user explicitly provided in their command.
 ### `/tower:council`
 **Multi-agent council with parallel opinions and synthesis**
 
-Runs multiple agents in parallel, each providing an independent opinion with a dynamically assigned expert persona. Agents then anonymously rank each other's responses, and a chairman synthesizes the final answer.
+First, analyze the user's question and suggest relevant perspectives via AskUserQuestion. Then run multiple agents in parallel with the selected personas. Agents anonymously rank each other's responses, and a chairman synthesizes the final answer.
 
-Best for: Evaluations, strategy decisions, comprehensive analysis
+Best for: Evaluations, strategy decisions, comprehensive analysis, general knowledge questions
 
 ### `/tower:debate`
 **Adversarial debate with pro/con agents**
@@ -61,15 +61,15 @@ Shows which agent backends (Claude, Codex, Gemini) are currently available.
 
 ## Dynamic Personas
 
-Council mode assigns expert personas based on task keywords:
+Analyze the user's question and suggest relevant personas. Use technical personas for code/architecture questions, generalist personas for general knowledge questions.
 
-| Persona | Trigger Keywords |
-|---------|------------------|
-| Security Analyst | auth, vulnerability, owasp, injection |
-| Systems Architect | scalability, performance, infrastructure |
-| Code Quality Reviewer | refactor, maintainability, testing |
-| Business Strategist | market, monetization, growth, startup |
-| Devil's Advocate | (auto-included for 3+ agents) |
+**Technical:** Security Analyst, Systems Architect, Code Quality Reviewer, DevOps Engineer, Data Engineer, Devil's Advocate
+
+**Generalist:** Research Analyst, Local Expert, Critical Thinker, Practical Advisor
+
+**Business:** Business Strategist, Product Manager, Financial Analyst, UX Designer
+
+Custom personas can be passed via `--personas '[{"name":"Expert Name","focus":"focus area"}]'`
 
 ## Examples
 
