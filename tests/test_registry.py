@@ -96,7 +96,8 @@ class TestBackendInstantiation:
         """Test Codex backend with defaults."""
         agent = get_agent("codex")
         assert agent.timeout == 300
-        assert agent.full_disk_read is True
+        # Default is False for security; CODEX_FULL_DISK_READ env var can enable
+        assert agent.full_disk_read is False
 
     def test_gemini_backend_defaults(self):
         """Test Gemini backend with defaults."""

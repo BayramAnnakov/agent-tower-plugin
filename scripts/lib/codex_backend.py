@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import sys
 from typing import Optional, Callable
 
@@ -10,6 +11,10 @@ from base import AgentBackend, StatusCallback
 from response import AgentResponse, AgentRole
 
 logger = logging.getLogger(__name__)
+
+# Environment variable to enable full disk read access
+# Default is False for security; set CODEX_FULL_DISK_READ=1 to enable
+_FULL_DISK_READ_DEFAULT = os.environ.get("CODEX_FULL_DISK_READ", "").lower() in ("1", "true", "yes")
 
 
 class CodexBackend(AgentBackend):
@@ -25,7 +30,7 @@ class CodexBackend(AgentBackend):
         self,
         timeout: int = 300,
         model: Optional[str] = None,
-        full_disk_read: bool = True,
+        full_disk_read: bool = _FULL_DISK_READ_DEFAULT,
         verbose: bool = False,
     ):
         """Initialize Codex backend.
@@ -33,7 +38,8 @@ class CodexBackend(AgentBackend):
         Args:
             timeout: Timeout in seconds
             model: Optional model override
-            full_disk_read: Allow reading files outside workspace
+            full_disk_read: Allow reading files outside workspace.
+                           Default: False (secure). Set CODEX_FULL_DISK_READ=1 env var to enable.
             verbose: Whether to print status to stderr
         """
         self.timeout = timeout

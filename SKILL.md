@@ -1,3 +1,13 @@
+---
+name: agent-tower-plugin
+description: Multi-agent deliberation for Claude Code - orchestrate AI coding assistants (Claude, Codex, Gemini) for council, debate, and consensus workflows
+allowed-tools:
+  - Bash
+  - Read
+  - Glob
+  - Grep
+---
+
 # Agent Tower Plugin
 
 Multi-agent deliberation for Claude Code. Orchestrate multiple AI coding assistants (Claude, Codex, Gemini) to get diverse perspectives on tasks.

@@ -16,6 +16,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 from registry import get_agent, get_available_agents
 from deliberation_mode import DeliberationMode
 
+# Security: Maximum input length to prevent resource exhaustion
+MAX_TASK_LENGTH = 100_000  # 100KB
+
+
+def validate_input(task: str) -> str | None:
+    """Validate task input. Returns error message or None if valid."""
+    if not task or not task.strip():
+        return "Task cannot be empty"
+    if len(task) > MAX_TASK_LENGTH:
+        return f"Task too long ({len(task)} chars). Maximum: {MAX_TASK_LENGTH}"
+    return None
+
 
 async def main():
     parser = argparse.ArgumentParser(description="Run producer/reviewer deliberation")
@@ -27,6 +39,11 @@ async def main():
     parser.add_argument("--verbose", "-v", action="store_true", help="Print progress to stderr")
 
     args = parser.parse_args()
+
+    # Validate input
+    if error := validate_input(args.task):
+        print(json.dumps({"error": error}), file=sys.stdout)
+        sys.exit(1)
 
     # Get available agents
     available = await get_available_agents()

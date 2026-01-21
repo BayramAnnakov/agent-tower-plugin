@@ -16,6 +16,18 @@ sys.path.insert(0, str(Path(__file__).resolve().parent / "lib"))
 from registry import get_agent, get_available_agents
 from debate_mode import DebateMode
 
+# Security: Maximum input length to prevent resource exhaustion
+MAX_QUESTION_LENGTH = 100_000  # 100KB
+
+
+def validate_input(question: str) -> str | None:
+    """Validate question input. Returns error message or None if valid."""
+    if not question or not question.strip():
+        return "Question cannot be empty"
+    if len(question) > MAX_QUESTION_LENGTH:
+        return f"Question too long ({len(question)} chars). Maximum: {MAX_QUESTION_LENGTH}"
+    return None
+
 
 async def main():
     parser = argparse.ArgumentParser(description="Run adversarial debate between agents")
@@ -27,6 +39,11 @@ async def main():
     parser.add_argument("--verbose", "-v", action="store_true", help="Print progress to stderr")
 
     args = parser.parse_args()
+
+    # Validate input
+    if error := validate_input(args.question):
+        print(json.dumps({"error": error}), file=sys.stdout)
+        sys.exit(1)
 
     # Get available agents
     available = await get_available_agents()

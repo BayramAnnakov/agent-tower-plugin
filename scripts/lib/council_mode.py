@@ -113,6 +113,7 @@ class CouncilMode:
         chairman: Optional[AgentBackend] = None,
         use_personas: bool = True,
         verbose: bool = False,
+        max_concurrent: int = 5,
     ):
         """Initialize council mode.
 
@@ -121,6 +122,7 @@ class CouncilMode:
             chairman: Agent to synthesize final answer (defaults to first member)
             use_personas: Whether to dynamically assign personas based on task
             verbose: Whether to print progress to stderr
+            max_concurrent: Maximum concurrent agent invocations (default: 5)
         """
         if len(members) < 2:
             raise ValueError("Council requires at least 2 members")
@@ -129,6 +131,8 @@ class CouncilMode:
         self.chairman = chairman or members[0]
         self.use_personas = use_personas
         self.verbose = verbose
+        self.max_concurrent = max_concurrent
+        self._semaphore = asyncio.Semaphore(max_concurrent)
         self.opinions: dict[str, CouncilOpinion] = {}
         self.rankings: list[PeerRanking] = []
         self.personas: dict[str, Persona] = {}
@@ -164,15 +168,16 @@ class CouncilMode:
                 })
             self._log(f"Assigned personas: {personas_assigned}")
 
-        # Stage 1: Parallel first opinions
-        self._log(f"Stage 1: Gathering opinions from {len(self.members)} council members")
+        # Stage 1: Parallel first opinions (with concurrency limit)
+        self._log(f"Stage 1: Gathering opinions from {len(self.members)} council members (max {self.max_concurrent} concurrent)")
 
         async def get_opinion_with_timing(member):
-            agent_start = time.time()
-            result = await self._get_opinion(member, task)
-            elapsed = format_elapsed(agent_start)
-            self._log(f"  {member.name}: completed in {elapsed}")
-            return result
+            async with self._semaphore:  # Limit concurrent subprocess invocations
+                agent_start = time.time()
+                result = await self._get_opinion(member, task)
+                elapsed = format_elapsed(agent_start)
+                self._log(f"  {member.name}: completed in {elapsed}")
+                return result
 
         opinions = await asyncio.gather(*[get_opinion_with_timing(m) for m in self.members])
 
@@ -190,11 +195,12 @@ class CouncilMode:
         anon_responses = self._format_anonymized_responses(anon_map)
 
         async def get_ranking_with_timing(member):
-            agent_start = time.time()
-            result = await self._get_ranking(member, task, anon_responses)
-            elapsed = format_elapsed(agent_start)
-            self._log(f"  {member.name}: ranked in {elapsed}")
-            return result
+            async with self._semaphore:  # Limit concurrent subprocess invocations
+                agent_start = time.time()
+                result = await self._get_ranking(member, task, anon_responses)
+                elapsed = format_elapsed(agent_start)
+                self._log(f"  {member.name}: ranked in {elapsed}")
+                return result
 
         rankings = await asyncio.gather(*[get_ranking_with_timing(m) for m in self.members])
 
