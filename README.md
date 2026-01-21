@@ -4,12 +4,29 @@ Multi-agent deliberation plugin for Claude Code. Orchestrate multiple AI coding 
 
 ## Installation
 
+### From Marketplace (Recommended)
+
+```bash
+# Add the marketplace
+claude plugin marketplace add BayramAnnakov/agent-tower-plugin
+
+# Install the plugin
+claude plugin install agent-tower-plugin@agent-tower-plugin-marketplace
+
+# IMPORTANT: Restart Claude Code to activate the plugin
+```
+
+### From Local Directory
+
 ```bash
 # From the plugin directory
 claude plugin add ./agent-tower-plugin
+```
 
-# Or install from GitHub
-claude plugin add https://github.com/youruser/agent-tower-plugin
+### From GitHub
+
+```bash
+claude plugin add https://github.com/BayramAnnakov/agent-tower-plugin
 ```
 
 ## Requirements
