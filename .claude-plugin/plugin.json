@@ -2,10 +2,17 @@
   "name": "agent-tower",
   "version": "0.1.0",
   "description": "Multi-agent deliberation for AI coding assistants",
-  "skills": [
-    "commands/council.md",
-    "commands/debate.md",
-    "commands/deliberate.md",
-    "commands/agents.md"
+  "author": {
+    "name": "Bayram Annakov",
+    "url": "https://github.com/bayramannakov"
+  },
+  "repository": "https://github.com/BayramAnnakov/agent-tower-plugin",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "multi-agent",
+    "deliberation",
+    "council",
+    "debate"
   ]
 }
