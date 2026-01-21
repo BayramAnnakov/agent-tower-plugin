@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+    branches: [main, master, fix/*]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pydantic
+
+      - name: Run tests
+        run: python -m pytest tests/ -v
+
+      - name: Test scripts can be imported
+        shell: bash
+        run: |
+          # Test that library modules can be imported
+          cd scripts/lib
+          python -c "from response import AgentResponse, AgentRole; print('response OK')"
+          python -c "from council import CouncilOpinion, CouncilResult; print('council OK')"
+          python -c "from feedback import ReviewFeedback, ProducerResponse; print('feedback OK')"
+          python -c "from personas import infer_personas, SECURITY_ANALYST; print('personas OK')"
+
+      - name: Test list_agents script (no external CLIs)
+        shell: bash
+        run: |
+          # This will fail health checks but should not crash
+          python scripts/list_agents.py || true

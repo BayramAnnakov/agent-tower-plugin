@@ -1,0 +1,11 @@
+{
+  "name": "agent-tower",
+  "version": "0.1.0",
+  "description": "Multi-agent deliberation for AI coding assistants",
+  "skills": [
+    "commands/council.md",
+    "commands/debate.md",
+    "commands/deliberate.md",
+    "commands/agents.md"
+  ]
+}
