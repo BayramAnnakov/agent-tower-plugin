@@ -42,6 +42,29 @@ At least 2 of these CLI tools must be installed and accessible:
 - **Codex CLI**: `codex --version`
 - **Gemini CLI**: `gemini --version`
 
+## OpenCode Backend (Optional)
+
+For environments where direct vendor CLIs are blocked but GitHub Copilot access is permitted:
+
+- **OpenCode CLI**: `opencode --version`
+
+OpenCode provides access to multiple AI models through GitHub Copilot:
+
+| Agent | Model | Vendor |
+|-------|-------|--------|
+| `opencode-gemini` | gemini-3-pro-preview | Google |
+| `opencode-gpt` | gpt-5.1-codex | OpenAI |
+| `opencode-claude` | claude-sonnet-4.6 | Anthropic |
+
+Example usage:
+```bash
+# Council with cross-vendor diversity
+/tower:council "Review this architecture" --agents claude,opencode-gemini,opencode-gpt
+
+# Debate using OpenCode models
+/tower:debate "REST vs GraphQL" --agents opencode-gpt,opencode-gemini
+```
+
 ## Skills
 
 ### `/tower:council` - Multi-Agent Council
