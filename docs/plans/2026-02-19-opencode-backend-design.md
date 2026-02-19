@@ -1,7 +1,7 @@
 # OpenCode Backend Design
 
 **Date:** 2026-02-19
-**Status:** Draft
+**Status:** Approved
 
 ## Overview
 
@@ -164,8 +164,10 @@ After implementation, users can install from the fork:
 
 Or submit as PR to upstream once validated.
 
-## Open Questions
+## Design Decisions
 
-1. Should we support custom model selection at runtime via `--model` flag?
-2. Should opencode agents be registered dynamically based on `opencode models` output?
-3. Rate limiting considerations for GitHub Copilot API?
+1. **Runtime `--model` flag?** → **Deferred.** Start with three pre-configured agents. Users needing custom models can fork and edit registry. Add flag later if demand emerges.
+
+2. **Dynamic agent discovery from `opencode models`?** → **Deferred.** Hardcoded agents are more predictable and avoid startup latency/failure modes. Three agents (Gemini, GPT, Claude) cover the vendor diversity use case.
+
+3. **Rate limiting for GitHub Copilot API?** → **Not implementing.** Consistent with existing backends (Claude, Codex, Gemini) which don't implement rate limiting. Add retry logic later if it becomes a pain point.
