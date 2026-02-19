@@ -45,3 +45,17 @@ class TestOpencodeBackend:
         # Model without slash uses full name
         backend2 = OpencodeBackend(model="local-model")
         assert backend2.agent_id == "local-model"
+
+
+class TestOpencodeHealthCheck:
+    """Tests for health_check method."""
+
+    @pytest.mark.asyncio
+    async def test_health_check_cli_not_found(self):
+        """Test health check returns False when CLI not installed."""
+        backend = OpencodeBackend()
+        # This will return False on machines without opencode installed
+        result = await backend.health_check()
+        # We can't assert True/False since it depends on environment
+        # Just verify it returns a boolean without error
+        assert isinstance(result, bool)

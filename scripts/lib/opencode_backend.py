@@ -51,4 +51,15 @@ class OpencodeBackend(AgentBackend):
 
     async def health_check(self) -> bool:
         """Check if opencode CLI is available."""
-        raise NotImplementedError("health_check not yet implemented")
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                "opencode", "--version",
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            _, _ = await asyncio.wait_for(proc.communicate(), timeout=10)
+            return proc.returncode == 0
+        except (FileNotFoundError, asyncio.TimeoutError):
+            return False
+        except Exception:
+            return False
