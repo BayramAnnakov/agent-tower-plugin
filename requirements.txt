@@ -3,3 +3,4 @@ pydantic>=2.0.0
 
 # Development/testing dependencies
 pytest>=7.0.0
+pytest-asyncio>=0.23.0
