@@ -58,6 +58,9 @@ Shows which agent backends (Claude, Codex, Gemini) are currently available.
 | claude | `claude -p` | opus |
 | codex | `codex exec` | default |
 | gemini | `gemini` | gemini-3-pro-preview |
+| opencode-gemini | `opencode run` | github-copilot/gemini-3-pro-preview |
+| opencode-gpt | `opencode run` | github-copilot/gpt-5.1-codex |
+| opencode-claude | `opencode run` | github-copilot/claude-sonnet-4.6 |
 
 ## Dynamic Personas
 
