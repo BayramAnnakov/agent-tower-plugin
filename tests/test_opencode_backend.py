@@ -59,3 +59,41 @@ class TestOpencodeHealthCheck:
         # We can't assert True/False since it depends on environment
         # Just verify it returns a boolean without error
         assert isinstance(result, bool)
+
+
+class TestOpencodeResponseParsing:
+    """Tests for JSONL response parsing."""
+
+    def test_parse_text_events(self):
+        """Test parsing text events from JSONL output."""
+        backend = OpencodeBackend()
+
+        jsonl = '''{"type":"step_start","timestamp":1234,"sessionID":"abc"}
+{"type":"text","timestamp":1235,"sessionID":"abc","part":{"text":"Hello "}}
+{"type":"text","timestamp":1236,"sessionID":"abc","part":{"text":"world!"}}
+{"type":"step_finish","timestamp":1237,"sessionID":"abc","part":{"tokens":{"input":10,"output":5}}}'''
+
+        result = backend._parse_jsonl_response(jsonl)
+        assert result == "Hello world!"
+
+    def test_parse_empty_output(self):
+        """Test parsing empty output returns empty string."""
+        backend = OpencodeBackend()
+        assert backend._parse_jsonl_response("") == ""
+        assert backend._parse_jsonl_response("   ") == ""
+
+    def test_parse_single_text_event(self):
+        """Test parsing single text event."""
+        backend = OpencodeBackend()
+        jsonl = '{"type":"text","part":{"text":"Single response"}}'
+        assert backend._parse_jsonl_response(jsonl) == "Single response"
+
+    def test_parse_invalid_json_lines(self):
+        """Test that invalid JSON lines are skipped."""
+        backend = OpencodeBackend()
+        jsonl = '''{"type":"text","part":{"text":"Valid"}}
+not valid json
+{"type":"text","part":{"text":" response"}}'''
+
+        result = backend._parse_jsonl_response(jsonl)
+        assert result == "Valid response"

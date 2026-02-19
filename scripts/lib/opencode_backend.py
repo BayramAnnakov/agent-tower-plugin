@@ -39,6 +39,44 @@ class OpencodeBackend(AgentBackend):
         # Short name for display (e.g., "gemini-3-pro-preview")
         self.agent_id = model.split("/")[-1] if "/" in model else model
 
+    def _parse_jsonl_response(self, output: str) -> str:
+        """Parse JSONL output from opencode CLI.
+
+        Extracts text from 'type: text' events and concatenates them.
+
+        Args:
+            output: Raw JSONL output from opencode run
+
+        Returns:
+            Concatenated text content
+        """
+        if not output.strip():
+            return ""
+
+        content_parts = []
+
+        for line in output.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+
+            try:
+                event = json.loads(line)
+                if not isinstance(event, dict):
+                    continue
+
+                # Extract text from type: "text" events
+                if event.get("type") == "text":
+                    part = event.get("part", {})
+                    if isinstance(part, dict) and "text" in part:
+                        content_parts.append(part["text"])
+
+            except json.JSONDecodeError:
+                # Skip invalid JSON lines
+                continue
+
+        return "".join(content_parts)
+
     async def invoke(
         self,
         prompt: str,
