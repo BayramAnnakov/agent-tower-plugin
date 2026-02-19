@@ -6,6 +6,7 @@ from base import AgentBackend
 from claude_backend import ClaudeBackend
 from codex_backend import CodexBackend
 from gemini_backend import GeminiBackend
+from opencode_backend import OpencodeBackend
 
 
 # Registry of available agent backends
@@ -14,6 +15,27 @@ AGENTS: dict[str, type[AgentBackend]] = {
     "codex": CodexBackend,
     "gemini": GeminiBackend,
 }
+
+
+def _create_opencode_gemini(**kwargs) -> OpencodeBackend:
+    """Factory for opencode-gemini agent."""
+    return OpencodeBackend(model="github-copilot/gemini-3-pro-preview", **kwargs)
+
+
+def _create_opencode_gpt(**kwargs) -> OpencodeBackend:
+    """Factory for opencode-gpt agent."""
+    return OpencodeBackend(model="github-copilot/gpt-5.1-codex", **kwargs)
+
+
+def _create_opencode_claude(**kwargs) -> OpencodeBackend:
+    """Factory for opencode-claude agent."""
+    return OpencodeBackend(model="github-copilot/claude-sonnet-4.6", **kwargs)
+
+
+# Register opencode agents
+AGENTS["opencode-gemini"] = _create_opencode_gemini
+AGENTS["opencode-gpt"] = _create_opencode_gpt
+AGENTS["opencode-claude"] = _create_opencode_claude
 
 
 def get_agent(name: str, **kwargs) -> AgentBackend:

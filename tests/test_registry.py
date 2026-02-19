@@ -75,6 +75,12 @@ class TestRegistry:
         with pytest.raises(TypeError):
             register_agent("invalid", NotAnAgent)
 
+    def test_opencode_agents_registered(self):
+        """Test that opencode agents are registered."""
+        assert "opencode-gemini" in AGENTS
+        assert "opencode-gpt" in AGENTS
+        assert "opencode-claude" in AGENTS
+
 
 class TestBackendInstantiation:
     """Tests for backend instantiation."""
@@ -105,3 +111,28 @@ class TestBackendInstantiation:
         assert agent.model == "gemini-3-pro-preview"
         assert agent.timeout == 600
         assert agent.sandbox is True
+
+
+class TestOpencodeBackendInstantiation:
+    """Tests for opencode backend instantiation."""
+
+    def test_opencode_gemini_defaults(self):
+        """Test opencode-gemini agent configuration."""
+        agent = get_agent("opencode-gemini")
+        assert agent.name == "opencode"
+        assert agent.model == "github-copilot/gemini-3-pro-preview"
+        assert agent.agent_id == "gemini-3-pro-preview"
+
+    def test_opencode_gpt_defaults(self):
+        """Test opencode-gpt agent configuration."""
+        agent = get_agent("opencode-gpt")
+        assert agent.name == "opencode"
+        assert agent.model == "github-copilot/gpt-5.1-codex"
+        assert agent.agent_id == "gpt-5.1-codex"
+
+    def test_opencode_claude_defaults(self):
+        """Test opencode-claude agent configuration."""
+        agent = get_agent("opencode-claude")
+        assert agent.name == "opencode"
+        assert agent.model == "github-copilot/claude-sonnet-4.6"
+        assert agent.agent_id == "claude-sonnet-4.6"
