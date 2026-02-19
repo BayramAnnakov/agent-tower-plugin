@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import sys
 from typing import Optional, Callable
 
@@ -72,12 +73,16 @@ class ClaudeBackend(AgentBackend):
 
         logger.debug(f"Claude command: {' '.join(cmd)}")
 
+        # Create clean environment without CLAUDECODE to allow nested invocation
+        env = {k: v for k, v in os.environ.items() if k != "CLAUDECODE"}
+
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdin=asyncio.subprocess.PIPE,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
+                env=env,
             )
 
             if status_callback:
