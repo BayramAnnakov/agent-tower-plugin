@@ -77,6 +77,22 @@ class OpencodeBackend(AgentBackend):
 
         return "".join(content_parts)
 
+    def _build_command(self, prompt: str) -> list[str]:
+        """Build the opencode command.
+
+        Args:
+            prompt: The prompt to send
+
+        Returns:
+            Command as list of strings (safe for subprocess)
+        """
+        return [
+            "opencode", "run",
+            prompt,
+            "-m", self.model,
+            "--format", "json",
+        ]
+
     async def invoke(
         self,
         prompt: str,
@@ -84,8 +100,68 @@ class OpencodeBackend(AgentBackend):
         role: AgentRole = AgentRole.COUNCIL_MEMBER,
         status_callback: Optional[StatusCallback] = None,
     ) -> AgentResponse:
-        """Invoke opencode CLI with the given prompt."""
-        raise NotImplementedError("invoke not yet implemented")
+        """Invoke opencode CLI with the given prompt.
+
+        Args:
+            prompt: The prompt/task to send
+            context: Optional context dictionary (unused for now)
+            role: The role this agent is playing
+            status_callback: Optional callback for status updates
+
+        Returns:
+            AgentResponse with the agent's output
+        """
+        cmd = self._build_command(prompt)
+
+        logger.debug(f"OpenCode command: {cmd[0]} {cmd[1]} ... -m {self.model}")
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            stdout, stderr = await asyncio.wait_for(
+                proc.communicate(),
+                timeout=self.timeout,
+            )
+
+            output = stdout.decode("utf-8")
+            content = self._parse_jsonl_response(output)
+
+            return AgentResponse(
+                agent_id=self.agent_id,
+                role=role,
+                content=content,
+                raw_output=output,
+                metadata={
+                    "model": self.model,
+                    "return_code": proc.returncode,
+                },
+            )
+
+        except asyncio.TimeoutError:
+            return AgentResponse(
+                agent_id=self.agent_id,
+                role=role,
+                content="[Error: Timeout]",
+                metadata={"error": "timeout", "timeout_seconds": self.timeout},
+            )
+        except FileNotFoundError:
+            return AgentResponse(
+                agent_id=self.agent_id,
+                role=role,
+                content="[Error: OpenCode CLI not found]",
+                metadata={"error": "cli_not_found"},
+            )
+        except Exception as e:
+            return AgentResponse(
+                agent_id=self.agent_id,
+                role=role,
+                content=f"[Error: {str(e)}]",
+                metadata={"error": str(e)},
+            )
 
     async def health_check(self) -> bool:
         """Check if opencode CLI is available."""

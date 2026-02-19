@@ -97,3 +97,44 @@ not valid json
 
         result = backend._parse_jsonl_response(jsonl)
         assert result == "Valid response"
+
+
+class TestOpencodeInvoke:
+    """Tests for invoke method."""
+
+    @pytest.mark.asyncio
+    async def test_invoke_cli_not_found(self):
+        """Test invoke returns error when CLI not installed."""
+        backend = OpencodeBackend()
+        response = await backend.invoke("test prompt")
+
+        # On machines without opencode, should return error response
+        assert response.agent_id == "gemini-3-pro-preview"
+        assert response.role == AgentRole.COUNCIL_MEMBER
+        # Either succeeds or returns CLI not found error
+        if response.is_error:
+            assert "not found" in response.content.lower() or "error" in response.content.lower()
+
+    @pytest.mark.asyncio
+    async def test_invoke_returns_agent_response(self):
+        """Test invoke returns proper AgentResponse structure."""
+        backend = OpencodeBackend(model="github-copilot/test-model")
+        response = await backend.invoke("test prompt", role=AgentRole.PRODUCER)
+
+        assert response.agent_id == "test-model"
+        assert response.role == AgentRole.PRODUCER
+        assert isinstance(response.content, str)
+        assert isinstance(response.metadata, dict)
+
+    def test_command_construction(self):
+        """Test that command is constructed correctly."""
+        backend = OpencodeBackend(model="github-copilot/gemini-3-pro-preview")
+        cmd = backend._build_command("test prompt")
+
+        assert cmd[0] == "opencode"
+        assert cmd[1] == "run"
+        assert "test prompt" in cmd
+        assert "-m" in cmd
+        assert "github-copilot/gemini-3-pro-preview" in cmd
+        assert "--format" in cmd
+        assert "json" in cmd
